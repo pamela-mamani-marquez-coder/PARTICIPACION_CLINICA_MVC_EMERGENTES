@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+{% block title %}Nueva Consulta{% endblock %}
+{% block content %}
+<div class="card">
+    <div class="card-header"><i class="bi bi-calendar-plus me-2"></i>Registrar Consulta</div>
+    <div class="card-body">
+        <form action="{{ url_for('consulta.create') }}" method="POST">
+            <div class="mb-3">
+                <label class="form-label">Médico *</label>
+                <select name="medico_id" class="form-select" required>
+                    <option value="">Seleccione un médico</option>
+                    {% for m in medicos %}
+                    <option value="{{ m.id }}">{{ m.nombre }} - {{ m.especialidad }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Paciente *</label>
+                <select name="paciente_id" class="form-select" required>
+                    <option value="">Seleccione un paciente</option>
+                    {% for p in pacientes %}
+                    <option value="{{ p.id }}">{{ p.nombre }} ({{ p.edad }} años)</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Fecha</label>
+                <input type="date" class="form-control" name="fecha" value="{{ today }}" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Diagnóstico *</label>
+                <textarea class="form-control" name="diagnostico" rows="3" required></textarea>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Tratamiento *</label>
+                <textarea class="form-control" name="tratamiento" rows="3" required></textarea>
+            </div>
+            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                <a href="{{ url_for('consulta.index') }}" class="btn btn-secondary me-md-2">Cancelar</a>
+                <button type="submit" class="btn btn-primary">Guardar Consulta</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

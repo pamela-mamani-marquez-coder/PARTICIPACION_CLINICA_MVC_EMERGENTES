@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+{% block title %}Nuevo Paciente{% endblock %}
+{% block content %}
+<div class="card">
+    <div class="card-header"><i class="bi bi-person-plus me-2"></i>Registrar Paciente</div>
+    <div class="card-body">
+        <form action="{{ url_for('paciente.create') }}" method="POST">
+            <div class="mb-3"><label class="form-label">Nombre *</label><input type="text" class="form-control" name="nombre" required></div>
+            <div class="mb-3"><label class="form-label">Edad *</label><input type="number" class="form-control" name="edad" required min="0" max="120"></div>
+            <div class="mb-3"><label class="form-label">Dirección</label><input type="text" class="form-control" name="direccion"></div>
+            <div class="mb-3"><label class="form-label">Teléfono</label><input type="tel" class="form-control" name="telefono"></div>
+            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                <a href="{{ url_for('paciente.index') }}" class="btn btn-secondary me-md-2">Cancelar</a>
+                <button type="submit" class="btn btn-success">Guardar</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

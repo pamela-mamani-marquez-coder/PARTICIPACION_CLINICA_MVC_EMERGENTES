@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% block title %}Filtrar Consultas{% endblock %}
+{% block content %}
+<div class="card">
+    <div class="card-header"><i class="bi bi-funnel me-2"></i>Filtrar Consultas por Fecha</div>
+    <div class="card-body">
+        <form action="{{ url_for('consulta.filtrar') }}" method="POST">
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Fecha Inicio</label>
+                    <input type="date" class="form-control" name="fecha_inicio" required>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Fecha Fin</label>
+                    <input type="date" class="form-control" name="fecha_fin" required>
+                </div>
+            </div>
+            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                <a href="{{ url_for('consulta.index') }}" class="btn btn-secondary me-md-2">Cancelar</a>
+                <button type="submit" class="btn btn-info"><i class="bi bi-search me-1"></i>Filtrar</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

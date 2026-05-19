@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+{% block title %}Editar Médico{% endblock %}
+{% block content %}
+<div class="card">
+    <div class="card-header"><i class="bi bi-pencil-square me-2"></i>Actualizar Médico</div>
+    <div class="card-body">
+        <form action="{{ url_for('medico.edit', id=medico.id) }}" method="POST">
+            <div class="mb-3"><label class="form-label">Nombre *</label><input type="text" class="form-control" name="nombre" value="{{ medico.nombre }}" required></div>
+            <div class="mb-3"><label class="form-label">Especialidad *</label><input type="text" class="form-control" name="especialidad" value="{{ medico.especialidad }}" required></div>
+            <div class="mb-3"><label class="form-label">Teléfono</label><input type="tel" class="form-control" name="telefono" value="{{ medico.telefono }}"></div>
+            <div class="mb-3"><label class="form-label">Correo *</label><input type="email" class="form-control" name="correo" value="{{ medico.correo }}" required></div>
+            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                <a href="{{ url_for('medico.index') }}" class="btn btn-secondary me-md-2">Cancelar</a>
+                <button type="submit" class="btn btn-warning">Actualizar</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
