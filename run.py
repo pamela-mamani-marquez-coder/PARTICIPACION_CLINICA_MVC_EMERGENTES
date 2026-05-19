@@ -1,13 +1,20 @@
-from flask import Flask, request
+import os
+from flask import Flask, request, session, redirect, url_for, flash, make_response
+from datetime import date
 from controllers import medico_controller, paciente_controller, consulta_controller
 from database import db
-from flask import session, redirect, url_for, flash
 
+# ============================================
+# INICIALIZACIÓN DE LA APLICACIÓN
+# ============================================
 app = Flask(__name__)
-app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///clinica.db"
-app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-app.config["SECRET_KEY"] = "clinica_secret_2026"
 
+# Configuración para local y Render
+app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get('DATABASE_URL') or "sqlite:///clinica.db"
+app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+app.config["SECRET_KEY"] = os.environ.get('SECRET_KEY') or "clinica_secret_2026_render"
+
+# Inicializar SQLAlchemy
 db.init_app(app)
 
 # Registrar Blueprints
@@ -15,13 +22,18 @@ app.register_blueprint(medico_controller)
 app.register_blueprint(paciente_controller)
 app.register_blueprint(consulta_controller)
 
-# Context processor para navbar activo
+# ============================================
+# CONTEXT PROCESSOR (Para navbar activo)
+# ============================================
 @app.context_processor
 def inject_active_path():
     def is_active(path):
         return 'active' if request.path.startswith(path) else ''
     return dict(is_active=is_active)
 
+# ============================================
+# RUTA PRINCIPAL - HOME ESTILIZADO
+# ============================================
 @app.route("/")
 def home():
     return """
@@ -38,6 +50,8 @@ def home():
                 background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
                 min-height: 100vh;
                 font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                margin: 0;
+                padding: 0;
             }
             .hero-section {
                 padding: 60px 20px;
@@ -78,6 +92,8 @@ def home():
             .card-menu:hover {
                 transform: translateY(-10px);
                 box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+                color: #333;
+                text-decoration: none;
             }
             .card-menu i {
                 font-size: 3rem;
@@ -154,15 +170,84 @@ def home():
     </body>
     </html>
     """
+
+# ============================================
+# RUTA DE LOGOUT (Cerrar Sesión)
+# ============================================
 @app.route("/logout")
 def logout():
     """Cerrar sesión y limpiar datos de usuario"""
-    session.clear() 
+    session.clear()
     flash('👋 Sesión cerrada correctamente. ¡Hasta pronto!', 'info')
     return redirect(url_for('home'))
 
+# ============================================
+# RUTA PARA INICIALIZAR BASE DE DATOS (Render)
+# ============================================
+@app.route("/init-db")
+def init_db_route():
+    """Inicializar la base de datos con datos de prueba"""
+    from models.medico_model import Medico
+    from models.paciente_model import Paciente
+    from models.consulta_model import Consulta
+    
+    with app.app_context():
+        db.create_all()
+        
+        # Solo crear datos si no existen
+        if not Medico.query.first():
+            # Crear médico de prueba
+            doctor = Medico(
+                nombre="Dr. Mario Torrez",
+                especialidad="Medicina General",
+                telefono="777-1234",
+                correo="mario@clinica.com"
+            )
+            db.session.add(doctor)
+            
+            # Crear paciente de prueba
+            paciente = Paciente(
+                nombre="Pamela Mamani",
+                edad=22,
+                direccion="Av. Principal #123",
+                telefono="666-5678"
+            )
+            db.session.add(paciente)
+            db.session.commit()
+            
+            # Crear consulta de prueba (relacionada)
+            consulta = Consulta(
+                fecha=date.today(),
+                diagnostico="Control médico rutinario",
+                tratamiento="Reposo y vitaminas",
+                medico_id=doctor.id,
+                paciente_id=paciente.id
+            )
+            db.session.add(consulta)
+            db.session.commit()
+            
+            return """
+            <div style="text-align:center; padding: 50px; font-family: sans-serif;">
+                <h1 style="color:#28a745;">✅ Base de datos creada exitosamente</h1>
+                <p>Se han creado: 1 Médico, 1 Paciente y 1 Consulta de prueba.</p>
+                <a href="/" style="display:inline-block; margin-top:20px; padding:10px 20px; background:#667eea; color:white; text-decoration:none; border-radius:5px;">Ir al Inicio</a>
+            </div>
+            """
+        else:
+            return """
+            <div style="text-align:center; padding: 50px; font-family: sans-serif;">
+                <h1 style="color:#17a2b8;">ℹ️ La base de datos ya existe</h1>
+                <p>Los datos de prueba ya fueron creados anteriormente.</p>
+                <a href="/" style="display:inline-block; margin-top:20px; padding:10px 20px; background:#667eea; color:white; text-decoration:none; border-radius:5px;">Ir al Inicio</a>
+            </div>
+            """
+
+# ============================================
+# EJECUCIÓN DE LA APLICACIÓN
+# ============================================
 if __name__ == "__main__":
     with app.app_context():
         db.create_all()
-        print("✅ Base de datos 'clinica.db' creada")
-    app.run(debug=True)
+        print("✅ Base de datos 'clinica.db' lista en 'instance/'")
+
+    app.run(debug=True, host='0.0.0.0', port=5000)
